@@ -1,4 +1,5 @@
 import React from 'react';
+import Parser from 'rss-parser';
 import { StyleSheet, TextInput, FlatList, Text, View, Image } from 'react-native';
 
 export default class App extends React.Component {
@@ -19,6 +20,7 @@ export default class App extends React.Component {
       .then((rJson) => {
         console.log(rJson);
         const items = rJson.results.map((el) => {
+          let parser = new Parser();
           return {
             title: el.collectionName,
             artist: el.artistName,
