@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TextInput, FlatList, Text, View } from 'react-native';
+import { StyleSheet, TextInput, FlatList, Text, View, Image } from 'react-native';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -14,12 +14,14 @@ export default class App extends React.Component {
   search(searchTerm) {
     this.setState({searchTerm});
 
-    fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(searchTerm)}&media=podcast`)
+    fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(searchTerm)}&media=podcast&entity=podcast&attribute=titleTerm`)
       .then(r => r.json())
       .then((rJson) => {
+        console.log(rJson);
         const items = rJson.results.map((el) => {
           return {
-            name: el.artistName,
+            title: el.collectionName,
+            artist: el.artistName,
             feed: el.feedUrl,
             artwork: el.artworkUrl600,
           };
@@ -32,13 +34,21 @@ export default class App extends React.Component {
       <View style={styles.container}>
         <TextInput
           style={styles.inputBox}
-          placeholder={'Search a Podcast!'}
+          placeholder={'Search'}
           onChangeText={searchTerm => this.search(searchTerm)}
           value={this.state.searchTerm}
         />
         <FlatList
           data={this.state.items}
-          renderItem={({item}) => <Text>{item.name}</Text>}
+          renderItem={({item}) => {
+            return (<View style={styles.lineItem}>
+              <Text>{item.title}</Text>
+              <Image
+                style={{width: 50, height: 50}}
+                source={{uri: item.artwork}}
+              />
+            </View>)
+          }}
         />       
       </View>
     );
@@ -48,10 +58,14 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
+    padding: 20
   },
   inputBox: {
     width: "100%",
     height: 40,
-    paddingLeft: 20
+    fontSize: 14,
+  },
+  lineItem: {
+    marginBottom: 10,
   }
 });
