@@ -1,24 +1,30 @@
 import React from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, FlatList, Text, View } from 'react-native';
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      text: ''
+      searchTerm: '',
+      items: []
     }
+
+    this.search = this.search.bind(this);
   }
-  componentDidMount() {
-    fetch('https://itunes.apple.com/search?term=new+york&media=podcast')
+  search(searchTerm) {
+    this.setState({searchTerm});
+
+    fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(searchTerm)}&media=podcast`)
       .then(r => r.json())
       .then((rJson) => {
-        rJson.results.map((el) => {
+        const items = rJson.results.map((el) => {
           return {
             name: el.artistName,
             feed: el.feedUrl,
             artwork: el.artworkUrl600,
           };
         });
+        this.setState({items});
       });
   }
   render() {
@@ -27,9 +33,13 @@ export default class App extends React.Component {
         <TextInput
           style={styles.inputBox}
           placeholder={'Search a Podcast!'}
-          onChangeText={(text) => this.setState({text})}
-          value={this.state.text}
+          onChangeText={searchTerm => this.search(searchTerm)}
+          value={this.state.searchTerm}
         />
+        <FlatList
+          data={this.state.items}
+          renderItem={({item}) => <Text>{item.name}</Text>}
+        />       
       </View>
     );
   }
